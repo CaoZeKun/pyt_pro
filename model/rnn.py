@@ -24,14 +24,12 @@ def load_data(data,BATCH_SIZE_TRA=1,BATCH_SIZE_VAL=1,SHUFFLE_BOOL_TRA=False,
     train_loader = torch.utils.data.DataLoader(dataset = train_data,
                                                batch_size = BATCH_SIZE_TRA,
                                                shuffle = SHUFFLE_BOOL_TRA,
-                                               num_workers = NUM_WORKERS_TRA,
-                                               )
+                                               num_workers = NUM_WORKERS_TRA,)
     val_data = Data.TensorDataset(x_val, y_val)
     val_loader = torch.utils.data.DataLoader(dataset = val_data,
                                              batch_size = BATCH_SIZE_VAL,
                                              shuffle = SHUFFLE_BOOL_VAL,
-                                             num_workers = NUM_WORKERS_VAL,
-                                             )
+                                             num_workers = NUM_WORKERS_VAL,)
 
     return train_loader, val_loader
 
@@ -61,6 +59,30 @@ class RNN(nn.Module):
         # choose r_out at the last time step
         out = self.out(r_out[:,-1,:])
         return out
+
+
+def construct_model_opt(INPUT_SIZE,HIDDEN_SIZE,OUTPUT_SIZE,LR=1e-3,OPT = 'Adam',WEIGHT_DECAY=0,
+                        LOSS_NAME = 'crossentropy',MODEL = 'RNN'):
+
+    if MODEL == 'RNN':
+        rnn = RNN(INPUT_SIZE,HIDDEN_SIZE,OUTPUT_SIZE,NUM_LAYERS=1,NONLINEARITY='tanh',
+                 BIAS_RNN_BOOL=True,BATCH_FIRST=True,DROPOUT_PRO=0,BIDIRECTIONAL_BOOL=False)
+
+    if OPT == 'Adagrad':
+        optimizer = torch.optim.Adagrad(rnn.parameters(),lr = LR, weight_decay=WEIGHT_DECAY)
+    elif OPT == 'SGD':
+        optimizer = torch.optim.SGD(rnn.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
+    else:
+        optimizer = torch.optim.Adam(rnn.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
+
+    if LOSS_NAME == 'MSELoss':
+        loss_fun = nn.MSELoss()
+    else:
+        loss_fun = nn.CrossEntropyLoss()
+
+    return rnn, optimizer, loss_fun
+
+
 
 
 # train
