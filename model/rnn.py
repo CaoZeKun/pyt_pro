@@ -83,8 +83,6 @@ def construct_model_opt(INPUT_SIZE,HIDDEN_SIZE,OUTPUT_SIZE,LR=1e-3,OPT = 'Adam',
     return rnn, optimizer, loss_fun
 
 
-
-
 # train
 def train_model(model,dataloaders,criterion,optimizer,num_epochs=25,is_inception=False):
     since = time.time()
