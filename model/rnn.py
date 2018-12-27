@@ -8,17 +8,16 @@ import matplotlib.pyplot as plt
 
 
 # data
-data = np.loadtxt('../data/iris.data')
-
-def load_data(data,k_train=0.9,BATCH_SIZE_TRA=1,BATCH_SIZE_VAL=1,SHUFFLE_BOOL_TRA=False,
+def load_data(data,k_fea,k_train=0.9,BATCH_SIZE_TRA=1,BATCH_SIZE_VAL=1,SHUFFLE_BOOL_TRA=False,
               SHUFFLE_BOOL_VAL=False,NUM_WORKERS_TRA=0,NUM_WORKERS_VAL=0):
+    # k_fea(特征所在最后一列的索引)
     data_length = len(data)
 
-    x_train = torch.FloatTensor(np.array(data[:k_train * data_length,:4]))
-    y_train = torch.LongTensor(np.array(data[:k_train * data_length,4]))
+    x_train = torch.FloatTensor(np.array(data[:k_train * data_length,:k_fea]))
+    y_train = torch.LongTensor(np.array(data[:k_train * data_length,k_fea]))
 
-    x_val = torch.FloatTensor(np.array(data[k_train * data_length:,:4]))
-    y_val = torch.LongTensor(np.array(data[k_train * data_length:,4]))
+    x_val = torch.FloatTensor(np.array(data[k_train * data_length:,:k_fea]))
+    y_val = torch.LongTensor(np.array(data[k_train * data_length:,k_fea]))
 
     train_data = Data.TensorDataset(x_train, y_train)
     train_loader = torch.utils.data.DataLoader(dataset = train_data,
@@ -30,7 +29,6 @@ def load_data(data,k_train=0.9,BATCH_SIZE_TRA=1,BATCH_SIZE_VAL=1,SHUFFLE_BOOL_TR
                                              batch_size = BATCH_SIZE_VAL,
                                              shuffle = SHUFFLE_BOOL_VAL,
                                              num_workers = NUM_WORKERS_VAL,)
-
     return train_loader, val_loader
 
 
@@ -43,7 +41,7 @@ class RNN(nn.Module):
             input_size = INPUT_SIZE,
             hidden_size = HIDDEN_SIZE,
             num_layers = NUM_LAYERS,
-            nonlinearity = NONLINEARITY,  #  'tanh' | 'relu
+            nonlinearity = NONLINEARITY,  # 'tanh' | 'relu
             bias = BIAS_RNN_BOOL,
             batch_first = BATCH_FIRST,  # data_format (batch, seq, feature)
             dropout = DROPOUT_PRO,
@@ -51,14 +49,16 @@ class RNN(nn.Module):
         )
         self.out = nn.Linear(HIDDEN_SIZE,OUTPUT_SIZE,bias=BIAS_RNN_BOOL)
 
-    def forward(self,x,h_state):
+    # def forward(self,x,h_state):
+    def forward(self, x):
         # x (batch, seq , feature)
         # h_state (num_layers * num_directions, batch, hidden_size)
         # r_out (batch, seq , num_directions * hidden_size)
-        r_out, h_state = self.rnn(x,h_state)
+        r_out, h_state = self.rnn(x)
         # choose r_out at the last time step
         out = self.out(r_out[:,-1,:])
-        return out, h_state
+        # return out, h_state
+        return out
 
 
 def construct_model_opt(INPUT_SIZE,HIDDEN_SIZE,OUTPUT_SIZE,LR=1e-3,OPT = 'Adam',WEIGHT_DECAY=0,
@@ -108,10 +108,11 @@ def train_model(model,train_loader,val_loader,criterion,optimizer,
         model.train()
         running_loss = 0.0
         running_corrects = 0
-        h_state = 0
+        # h_state = 0
         for step_0, (train_x, train_y) in enumerate(train_loader):
-            output_tra, h_state= model(train_x,h_state) #  output
-            h_state = h_state.data
+            # output_tra, h_state= model(train_x,h_state) #  output
+            output_tra = model(train_x)  # output
+            # h_state = h_state.data
             loss_tra = criterion(output_tra, train_y)  # cross entropy loss
             optimizer.zero_grad()  # clear gradients for this training step
             loss_tra.backward()  # backpropagation, compute gradients
@@ -131,7 +132,7 @@ def train_model(model,train_loader,val_loader,criterion,optimizer,
         h_state = 0
         model.eval()
         for step_1, (val_x, val_y) in enumerate(val_loader):
-            output_val, _ = model(val_x,h_state) #  output
+            output_val = model(val_x,h_state) #  output
             loss = criterion(output_val, val_y)  # cross entropy loss
 
             _, val_preds = torch.max(output_val, 1)
@@ -171,22 +172,38 @@ def load_model_test(PATH,data):
     model.eval()
 
     # 1. simple, not many samples
-
-
-
+    data_x = torch.Tensor(np.array(data))
+    data_y = model(data_x)
+    return data_x, data_y
 
 
 # save parameters
-def load_param_test(model,TheModelClass,PATH):
+# def load_param_test(model,TheModelClass,PATH,):
+#     ###
+#     model = TheModelClass(*args, **kwargs)
+#     model.load_state_dict(torch.load(PATH))
+#     model.eval()
 
+def Flow(data,K_fea, HIDDEN_SIZE, OUTPUT_SIZE, PATH,num_epochs=1,CUDA_ID="0",isClassfier=True):
+    train_loader, val_loader = load_data(data, K_fea)
+    model, optimizer, criterion = construct_model_opt(K_fea, HIDDEN_SIZE, OUTPUT_SIZE)
+    train_model(model, train_loader, val_loader, criterion, optimizer,PATH,num_epochs,CUDA_ID,isClassfier)
 
-    ###
-    model = TheModelClass(*args, **kwargs)
-    model.load_state_dict(torch.load(PATH))
-    model.eval()
 
 
 if __name__ =='__main__':
+    # load data | construct model | train | save
+    data = np.loadtxt('../data/iris.data')
+    path = '/model_save/model_params.pkl'
+    Flow(data=data,k_fea=4,HIDDEN_SIZE=20,OUTPUT_SIZE=2,PATH=path,num_epochs=10)
+
+    # load model | predict/test
+    load_model_test(path,data)
+
+
+
+
+
     torch.save(model.state_dict(), '/model_save/model_params.pkl')
 
 
