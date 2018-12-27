@@ -13,11 +13,17 @@ def load_data(data,k_fea,k_train=0.9,BATCH_SIZE_TRA=1,BATCH_SIZE_VAL=1,SHUFFLE_B
     # k_fea(特征所在最后一列的索引)
     data_length = len(data)
 
-    x_train = torch.FloatTensor(np.array(data[:k_train * data_length,:k_fea]))
-    y_train = torch.LongTensor(np.array(data[:k_train * data_length,k_fea]))
+    """data dimension should"""
+    if np.shape(data)
 
-    x_val = torch.FloatTensor(np.array(data[k_train * data_length:,:k_fea]))
-    y_val = torch.LongTensor(np.array(data[k_train * data_length:,k_fea]))
+    x_train = torch.FloatTensor(np.array(data[:int(k_train * data_length),:k_fea]))
+    y_train = torch.LongTensor(np.array(data[:int(k_train * data_length),k_fea]))
+
+    x_val = torch.FloatTensor(np.array(data[int(k_train * data_length):,:k_fea]))
+    y_val = torch.LongTensor(np.array(data[int(k_train * data_length):,k_fea]))
+
+    x = torch.from_numpy(x_np[np.newaxis, :, np.newaxis])  # shape (batch, time_step, input_size)
+    y = torch.from_numpy(y_np[np.newaxis, :, np.newaxis])
 
     train_data = Data.TensorDataset(x_train, y_train)
     train_loader = torch.utils.data.DataLoader(dataset = train_data,
@@ -179,31 +185,34 @@ def load_model_test(PATH,data):
 
 # save parameters
 # def load_param_test(model,TheModelClass,PATH,):
+#     torch.save(model.state_dict(), PATH)
 #     ###
 #     model = TheModelClass(*args, **kwargs)
 #     model.load_state_dict(torch.load(PATH))
 #     model.eval()
 
-def Flow(data,K_fea, HIDDEN_SIZE, OUTPUT_SIZE, PATH,num_epochs=1,CUDA_ID="0",isClassfier=True):
+def Flow(data,K_fea,HIDDEN_SIZE, OUTPUT_SIZE, PATH,num_epochs=1,CUDA_ID="0",isClassfier=True):
     train_loader, val_loader = load_data(data, K_fea)
-    model, optimizer, criterion = construct_model_opt(K_fea, HIDDEN_SIZE, OUTPUT_SIZE)
+    model, optimizer, criterion = construct_model_opt(K_fea, HIDDEN_SIZE, OUTPUT_SIZE,MODEL='RNN')
     train_model(model, train_loader, val_loader, criterion, optimizer,PATH,num_epochs,CUDA_ID,isClassfier)
 
 
 
 if __name__ =='__main__':
     # load data | construct model | train | save
-    data = np.loadtxt('../data/iris.data')
+    data = np.loadtxt('../data/iris.data',delimiter=',')
+    # print(np.shape(data))
     path = '/model_save/model_params.pkl'
-    Flow(data=data,k_fea=4,HIDDEN_SIZE=20,OUTPUT_SIZE=2,PATH=path,num_epochs=10)
+    data_test = data[:,:4]
+
+
+    Flow(data=data,K_fea=4,HIDDEN_SIZE=20,OUTPUT_SIZE=2,PATH=path,num_epochs=10)
 
     # load model | predict/test
-    load_model_test(path,data)
+    # data_test should only have feature
+    load_model_test(path,data_test)
 
 
 
-
-
-    torch.save(model.state_dict(), '/model_save/model_params.pkl')
 
 
