@@ -55,6 +55,51 @@ except :
     print("捕获自定义异常")
 
 
+# python 3.6
+# 定义一个新的函数
+def printStar(func):
+    print('*************************************')
+    return func()
+
+
+@printStar
+def add():
+    return 1 + 1
+
+
+def sub():
+    return 2 - 1
+
+
+print(add)
+print(printStar(sub))
+
+
+
+
+# python 3.6
+# 定义一个新的函数
+def printStar(func):
+    def f():
+        print('*************************************')
+        return func()
+
+    return f
+
+
+@printStar
+def add():
+    return 1 + 1
+
+
+@printStar
+def sub():
+    return 2 - 1
+
+
+print(add())
+
+print(sub())
 
 
 

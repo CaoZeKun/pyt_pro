@@ -38,4 +38,8 @@ def load_data_pikcachu(batch_size, edge_size=256):
     return train_iter, val_iter
 
 if __name__ =='__main__':
-    _download_pikachu()
+
+    batch_size, edge_size = 32,256
+    train_iter, _ = load_data_pikcachu(batch_size,edge_size)
+    batch = train_iter.next()
+
