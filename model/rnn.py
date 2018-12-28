@@ -286,7 +286,6 @@ def load_model_test(PATH,data,isClassfier=True):
 
 
 if __name__ =='__main__':
-
     # load data | construct model | train | save
     data = np.loadtxt('../data/iris.data',delimiter=',')  # two class
     # print(np.shape(data))
