@@ -1,5 +1,5 @@
-import gluonbook as gb
-from mcnet import gluon, image
+# import gluonbook as gb
+from mxnet import gluon, image
 from mxnet.gluno import utils as gutils
 import os
 
@@ -42,4 +42,5 @@ if __name__ =='__main__':
     batch_size, edge_size = 32,256
     train_iter, _ = load_data_pikcachu(batch_size,edge_size)
     batch = train_iter.next()
+    print(batch.data[0].shape, batch.label[0].shape)
 
