@@ -1,8 +1,5 @@
 import random
 import numpy as np
-import copy
-from operator import attrgetter
-import matplotlib.pyplot as plt
 random.seed(1)
 
 
