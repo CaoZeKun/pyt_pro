@@ -121,6 +121,6 @@ def aNewMethodLDAP(A,alpha):
 
 if __name__ == '__main__':
     alpha = 0.6
-    A = np.loadtxt("./data/data_create/data/lnc_dis_association.txt")
+    A = np.loadtxt("../data/data_create/data/lnc_dis_association.txt")
     R = aNewMethodLDAP(A,alpha)
     print(R)
