@@ -1,6 +1,6 @@
 # import gluonbook as gb
 from mxnet import gluon, image
-from mxnet.gluno import utils as gutils
+from mxnet.gluon import utils as gutils
 import os
 
 def _download_pikachu(data_dir):
@@ -28,7 +28,7 @@ def load_data_pikcachu(batch_size, edge_size=256):
         shuffle=True,  # 以随机顺序读取数据集
         rand_crop=1,  #随机裁剪的概率为 1
         min_object_covered=0.95,
-        max_attempts=200)
+        max_attempts=10)
     val_iter = image.ImageDetIter(
         path_imgrec=os.path.join(data_dir,'val.rec'),
         batch_size=batch_size,
