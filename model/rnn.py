@@ -247,7 +247,7 @@ def train_model(model,train_loader,val_loader,criterion,optimizer,
 
 # test
 def Flow(data,K_fea,HIDDEN_SIZE, OUTPUT_SIZE, PATH, num_epochs=1, LR=1e-3,
-         LOSS_NAME = 'MSELoss', CUDA_ID="0", isClassfier=True, MODEL='RNN'):
+         LOSS_NAME = 'crossentropy', CUDA_ID="0", isClassfier=True, MODEL='RNN'):
     train_loader, val_loader = load_data(data, K_fea, k_train=0.9, BATCH_SIZE_TRA=1, BATCH_SIZE_VAL=1, SHUFFLE_BOOL_TRA=True,
               SHUFFLE_BOOL_VAL=True, NUM_WORKERS_TRA=0, NUM_WORKERS_VAL=0, isClassfier=isClassfier,LOSSNAME=LOSS_NAME)
     model, optimizer, criterion = construct_model_opt(K_fea, HIDDEN_SIZE, OUTPUT_SIZE, LR=LR, OPT='Adam', WEIGHT_DECAY=0,
